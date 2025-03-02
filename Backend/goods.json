@@ -1,0 +1,48 @@
+[
+  {
+    "id": 1,
+    "name": "Macintosh",
+    "price": 30000,
+    "description": "Классический Macintosh 512k из 1984 года.",
+    "categories": [
+      "Apple",
+      "Б/у"
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Walkman",
+    "price": 10000,
+    "description": "Sony Walkman 2019 года в честь 50-летия бренда.",
+    "categories": [
+      "Плеер"
+    ]
+  },
+  {
+    "id": 3,
+    "name": "New Nintendo 3ds",
+    "price": 20000,
+    "description": "Не распечатанная New Nintendo 3ds в фирменном синем цвете.",
+    "categories": [
+      "Nintendo"
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Nintendo Switch Oled",
+    "price": 30000,
+    "description": "Новая версия switch с большим old экраном, улучшенным звуком, подставкой и вдвое большим объёмом встроенной памяти.",
+    "categories": [
+      "Nintendo"
+    ]
+  },
+  {
+    "id": 5,
+    "name": "iPhone",
+    "price": 225000,
+    "description": "Запакованный iPhone 2G на 8GB.",
+    "categories": [
+      "Apple"
+    ]
+  }
+]

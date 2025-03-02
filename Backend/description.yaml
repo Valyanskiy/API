@@ -1,0 +1,89 @@
+openapi: 3.0.0
+info:
+  title: Admin Panel API
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+
+paths:
+  /products:
+    get:
+      summary: Get all products
+      responses:
+        200:
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+    post:
+      summary: Create new product(s)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/Product'
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/Product'
+      responses:
+        201:
+          description: Product(s) created
+  /products/{id}:
+    put:
+      summary: Update product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        200:
+          description: Product updated
+    delete:
+      summary: Delete product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        204:
+          description: Product deleted
+
+components:
+  schemas:
+    Product:
+      type: object
+      required:
+        - name
+        - price
+        - description
+        - categories
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+        price:
+          type: number
+        description:
+          type: string
+        categories:
+          type: array
+          items:
+            type: string

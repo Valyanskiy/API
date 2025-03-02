@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Админ-панель</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .card {
+            margin-bottom: 1.5rem;
+        }
+        .form-section {
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-light">
+<div class="container mt-4">
+    <h1 class="mb-4">Админ-панель управления товарами</h1>
+
+    <!-- Добавление товара -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Добавить новый товар</h2>
+        </div>
+        <div class="card-body">
+            <form id="addForm" onsubmit="addProduct(event)" class="row g-3">
+                <div class="col-md-6">
+                    <input type="text" class="form-control" id="name" placeholder="Название товара" required>
+                </div>
+                <div class="col-md-6">
+                    <input type="number" class="form-control" id="price" placeholder="Цена" step="0.01" required>
+                </div>
+                <div class="col-12">
+                    <textarea class="form-control" id="description" placeholder="Описание товара" rows="2"></textarea>
+                </div>
+                <div class="col-md-12">
+                    <input type="text" class="form-control" id="categories" placeholder="Категории (через запятую)">
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-success">Добавить товар</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Редактирование товара -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Редактировать товар</h2>
+        </div>
+        <div class="card-body">
+            <form id="editForm" onsubmit="editProduct(event)" class="row g-3">
+                <div class="col-md-3">
+                    <input type="number" class="form-control" id="editId" placeholder="ID товара" required>
+                </div>
+                <div class="col-md-9"></div>
+                <div class="col-md-6">
+                    <input type="text" class="form-control" id="editName" placeholder="Новое название">
+                </div>
+                <div class="col-md-6">
+                    <input type="number" class="form-control" id="editPrice" placeholder="Новая цена" step="0.01">
+                </div>
+                <div class="col-12">
+                    <textarea class="form-control" id="editDescription" placeholder="Новое описание" rows="2"></textarea>
+                </div>
+                <div class="col-md-12">
+                    <input type="text" class="form-control" id="editCategories" placeholder="Новые категории (через запятую)">
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-success">Обновить товар</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Удаление товара -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="h5 mb-0">Удалить товар</h2>
+        </div>
+        <div class="card-body">
+            <form id="deleteForm" onsubmit="deleteProduct(event)" class="row g-3 align-items-center">
+                <div class="col-md-4">
+                    <input type="number" class="form-control" id="deleteId" placeholder="ID товара" required>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-danger w-100">Удалить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Список товаров -->
+    <h2 class="mt-4 mb-3">Список товаров</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Название</th>
+                <th>Цена</th>
+                <th>Описание</th>
+                <th>Категории</th>
+            </tr>
+            </thead>
+            <tbody id="goodsTableBody">
+            <!-- Данные будут загружаться динамически -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Загрузка товаров при открытии страницы
+    document.addEventListener('DOMContentLoaded', fetchGoods);
+
+    async function fetchGoods() {
+        try {
+            const response = await fetch('/products');
+            const goods = await response.json();
+            const tbody = document.querySelector('#goodsTableBody');
+            tbody.innerHTML = '';
+
+            goods.forEach(good => {
+                const row = `
+                        <tr>
+                            <td>${good.id}</td>
+                            <td>${good.name}</td>
+                            <td>${good.price}</td>
+                            <td>${good.description}</td>
+                            <td>${good.categories?.join(', ') || ''}</td>
+                        </tr>
+                    `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        } catch (error) {
+        }
+    }
+
+    async function addProduct(event) {
+        event.preventDefault();
+        try {
+            const categories = document.getElementById('categories').value
+                .split(',')
+                .map(c => c.trim())
+                .filter(c => c);
+
+            const response = await fetch('/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: document.getElementById('name').value,
+                    price: parseFloat(document.getElementById('price').value),
+                    description: document.getElementById('description').value,
+                    categories: categories
+                })
+            });
+
+            if (!response.ok) throw new Error('Ошибка добавления');
+
+            document.getElementById('addForm').reset();
+            await fetchGoods();
+        } catch (error) {
+        }
+    }
+
+    async function editProduct(event) {
+        event.preventDefault();
+        try {
+            const id = document.getElementById('editId').value;
+            const updateData = {};
+
+            if (document.getElementById('editName').value) updateData.name = document.getElementById('editName').value;
+            if (document.getElementById('editPrice').value) updateData.price = parseFloat(document.getElementById('editPrice').value);
+            if (document.getElementById('editDescription').value) updateData.description = document.getElementById('editDescription').value;
+
+            const categories = document.getElementById('editCategories').value
+                .split(',')
+                .map(c => c.trim())
+                .filter(c => c);
+            if (categories.length) updateData.categories = categories;
+
+            const response = await fetch(`/products/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updateData)
+            });
+
+            if (!response.ok) throw new Error('Товар не найден');
+
+            document.getElementById('editForm').reset();
+            await fetchGoods();
+        } catch (error) {
+        }
+    }
+
+    async function deleteProduct(event) {
+        event.preventDefault();
+        try {
+            const id = document.getElementById('deleteId').value;
+            const response = await fetch(`/products/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) throw new Error('Ошибка удаления');
+
+            document.getElementById('deleteForm').reset();
+            await fetchGoods();
+        } catch (error) {
+
+        }
+    }
+</script>
+</body>
+</html>
